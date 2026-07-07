@@ -44,17 +44,28 @@ func main() {
 			RecursionAvailable:    false,
 			Reserved:              0,
 			ResponseCode:          0,
-			QuestionCount:         0,
+			QuestionCount:         1,
 			AnswerRecordCount:     0,
 			AuthorityRecordCount:  0,
 			AdditionalRecordCount: 0,
 		}
 
-		bs := head.Encode()
+		question := message.Question{
+			Labels: []string{
+				"codecrafters", "io",
+			},
+			Record: 1,
+			Class:  1,
+		}
 
-		fmt.Printf("%v", bs)
+		hb := head.Encode()
+		qb := question.Encode()
 
-		_, err = udpConn.WriteToUDP(bs, source)
+		by := []byte{}
+		by = append(by, hb...)
+		by = append(by, qb...)
+
+		_, err = udpConn.WriteToUDP(by, source)
 		if err != nil {
 			fmt.Println("Failed to send response:", err)
 		}
