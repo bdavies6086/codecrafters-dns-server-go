@@ -36,7 +36,7 @@ func main() {
 
 		head := message.Header{
 			ID:                    1234,
-			Query:                 false,
+			Query:                 true,
 			OpCode:                4,
 			AuthorativeAnswer:     true,
 			Truncation:            true,
