@@ -53,7 +53,7 @@ func (h Header) Encode() []byte {
 	b11 := uint8(h.AdditionalRecordCount)
 	b12 := uint8(h.AdditionalRecordCount >> 8)
 
-	return append(headerBytes, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12)
+	return headerBytes
 
 }
 
