@@ -22,7 +22,7 @@ func (h Header) Encode() []byte {
 	headerBytes := make([]byte, 12)
 
 	b1 := uint8(h.ID)
-	b2 := uint8(h.ID << 8)
+	b2 := uint8(h.ID >> 8)
 
 	fmt.Printf("%b\n", h.ID)
 	fmt.Printf("%b\n", b1)
