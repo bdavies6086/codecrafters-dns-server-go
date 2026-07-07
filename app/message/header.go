@@ -24,8 +24,8 @@ func (h Header) Encode() []byte {
 	b1 := uint8(h.ID)
 	b2 := uint8(h.ID << 8)
 
-	fmt.Printf("%v", b1)
-	fmt.Printf("%v", b2)
+	fmt.Printf("%v\n", b1)
+	fmt.Printf("%v\n", b2)
 
 	b3 := boolToUint8(h.Query, 0)
 	b3 = b3 | (h.OpCode >> 1)
