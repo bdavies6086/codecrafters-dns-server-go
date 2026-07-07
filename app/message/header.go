@@ -1,7 +1,5 @@
 package message
 
-import "fmt"
-
 type Header struct {
 	ID                    uint16 // Packet Identifier
 	Query                 bool   // Query or response indicator
@@ -21,40 +19,34 @@ type Header struct {
 func (h Header) Encode() []byte {
 	headerBytes := make([]byte, 12)
 
-	b1 := uint8(h.ID)
-	b2 := uint8(h.ID >> 8)
+	headerBytes[0] = uint8(h.ID >> 8)
+	headerBytes[1] = uint8(h.ID)
 
-	headerBytes = append(headerBytes, b2)
-	headerBytes = append(headerBytes, b1)
+	b3 := boolToUint8(h.Query, 7)
+	b3 = b3 | (h.OpCode << 3)
+	b3 = b3 | boolToUint8(h.AuthorativeAnswer, 2)
+	b3 = b3 | boolToUint8(h.Truncation, 1)
+	b3 = b3 | boolToUint8(h.RecursionDesired, 0)
+	headerBytes[2] = b3
 
-	fmt.Printf("%b\n", h.ID)
-	fmt.Printf("%b\n", b1)
-	fmt.Printf("%b\n", b2)
+	b4 := boolToUint8(h.RecursionAvailable, 7)
+	b4 = b4 | (h.Reserved << 4)
+	b4 = b4 | h.ResponseCode
+	headerBytes[3] = b4
 
-	b3 := boolToUint8(h.Query, 0)
-	b3 = b3 | (h.OpCode << 1)
-	b3 = b3 | boolToUint8(h.AuthorativeAnswer, 5)
-	b3 = b3 | boolToUint8(h.Truncation, 6)
-	b3 = b3 | boolToUint8(h.RecursionDesired, 7)
+	headerBytes[4] = uint8(h.QuestionCount >> 8)
+	headerBytes[5] = uint8(h.QuestionCount)
 
-	b4 := boolToUint8(h.RecursionAvailable, 0)
-	b4 = b4 | (h.Reserved << 1)
-	b4 = b4 | (h.ResponseCode << 4)
+	headerBytes[6] = uint8(h.AnswerRecordCount >> 8)
+	headerBytes[7] = uint8(h.AnswerRecordCount)
 
-	// b5 := uint8(h.QuestionCount)
-	// b6 := uint8(h.QuestionCount >> 8)
+	headerBytes[8] = uint8(h.AuthorityRecordCount >> 8)
+	headerBytes[9] = uint8(h.AuthorityRecordCount)
 
-	// b7 := uint8(h.AnswerRecordCount)
-	// b8 := uint8(h.AnswerRecordCount >> 8)
-
-	// b9 := uint8(h.AuthorityRecordCount)
-	// b10 := uint8(h.AuthorityRecordCount >> 8)
-
-	// b11 := uint8(h.AdditionalRecordCount)
-	// b12 := uint8(h.AdditionalRecordCount >> 8)
+	headerBytes[10] = uint8(h.AdditionalRecordCount >> 8)
+	headerBytes[11] = uint8(h.AdditionalRecordCount)
 
 	return headerBytes
-
 }
 
 func boolToUint8(b bool, shift uint8) uint8 {
