@@ -1,7 +1,5 @@
 package message
 
-import "fmt"
-
 type Header struct {
 	ID                    uint16 // Packet Identifier
 	Query                 bool   // Query or response indicator
@@ -25,7 +23,6 @@ func (h Header) Encode() []byte {
 	headerBytes[1] = uint8(h.ID)
 
 	b3 := boolToUint8(h.Query, 7)
-	fmt.Printf("%b\n", b3)
 	b3 = b3 | (h.OpCode << 3)
 	b3 = b3 | boolToUint8(h.AuthorativeAnswer, 2)
 	b3 = b3 | boolToUint8(h.Truncation, 1)
@@ -54,7 +51,7 @@ func (h Header) Encode() []byte {
 
 func boolToUint8(b bool, shift uint8) uint8 {
 	if b {
-		return uint8(1) >> shift
+		return uint8(1) << shift
 	}
 	return uint8(0)
 }
