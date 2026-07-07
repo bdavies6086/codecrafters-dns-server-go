@@ -25,13 +25,12 @@ func (h Header) Encode() []byte {
 	headerBytes[1] = uint8(h.ID)
 
 	b3 := boolToUint8(h.Query, 7)
+	fmt.Printf("%b\n", b3)
 	b3 = b3 | (h.OpCode << 3)
 	b3 = b3 | boolToUint8(h.AuthorativeAnswer, 2)
 	b3 = b3 | boolToUint8(h.Truncation, 1)
 	b3 = b3 | boolToUint8(h.RecursionDesired, 0)
 	headerBytes[2] = b3
-
-	fmt.Printf("%b", b3)
 
 	b4 := boolToUint8(h.RecursionAvailable, 7)
 	b4 = b4 | (h.Reserved << 4)
