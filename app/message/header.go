@@ -24,6 +24,9 @@ func (h Header) Encode() []byte {
 	b1 := uint8(h.ID)
 	b2 := uint8(h.ID >> 8)
 
+	headerBytes = append(headerBytes, b2)
+	headerBytes = append(headerBytes, b1)
+
 	fmt.Printf("%b\n", h.ID)
 	fmt.Printf("%b\n", b1)
 	fmt.Printf("%b\n", b2)
@@ -50,7 +53,7 @@ func (h Header) Encode() []byte {
 	b11 := uint8(h.AdditionalRecordCount)
 	b12 := uint8(h.AdditionalRecordCount >> 8)
 
-	return append(headerBytes, b2, b1, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12)
+	return append(headerBytes, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12)
 
 }
 
