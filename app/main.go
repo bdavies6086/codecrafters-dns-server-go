@@ -35,7 +35,7 @@ func main() {
 		fmt.Printf("Received %d bytes from %s: %s\n", size, source, receivedData)
 
 		head := message.Header{
-			ID:                    102,
+			ID:                    1234,
 			Query:                 false,
 			OpCode:                4,
 			AuthorativeAnswer:     true,
