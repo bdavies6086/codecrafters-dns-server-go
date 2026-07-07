@@ -41,17 +41,17 @@ func (h Header) Encode() []byte {
 	b4 = b4 | (h.Reserved << 1)
 	b4 = b4 | (h.ResponseCode << 4)
 
-	b5 := uint8(h.QuestionCount)
-	b6 := uint8(h.QuestionCount >> 8)
+	// b5 := uint8(h.QuestionCount)
+	// b6 := uint8(h.QuestionCount >> 8)
 
-	b7 := uint8(h.AnswerRecordCount)
-	b8 := uint8(h.AnswerRecordCount >> 8)
+	// b7 := uint8(h.AnswerRecordCount)
+	// b8 := uint8(h.AnswerRecordCount >> 8)
 
-	b9 := uint8(h.AuthorityRecordCount)
-	b10 := uint8(h.AuthorityRecordCount >> 8)
+	// b9 := uint8(h.AuthorityRecordCount)
+	// b10 := uint8(h.AuthorityRecordCount >> 8)
 
-	b11 := uint8(h.AdditionalRecordCount)
-	b12 := uint8(h.AdditionalRecordCount >> 8)
+	// b11 := uint8(h.AdditionalRecordCount)
+	// b12 := uint8(h.AdditionalRecordCount >> 8)
 
 	return headerBytes
 
