@@ -50,7 +50,11 @@ func main() {
 			AdditionalRecordCount: 0,
 		}
 
-		_, err = udpConn.WriteToUDP(head.Encode(), source)
+		bs := head.Encode()
+
+		fmt.Printf("%v", bs)
+
+		_, err = udpConn.WriteToUDP(bs, source)
 		if err != nil {
 			fmt.Println("Failed to send response:", err)
 		}
