@@ -45,7 +45,7 @@ func main() {
 			Reserved:              0,
 			ResponseCode:          0,
 			QuestionCount:         1,
-			AnswerRecordCount:     0,
+			AnswerRecordCount:     1,
 			AuthorityRecordCount:  0,
 			AdditionalRecordCount: 0,
 		}
@@ -58,12 +58,27 @@ func main() {
 			Class:  1,
 		}
 
+		answer := message.Answer{
+			Labels: []string{
+				"codecrafters", "io",
+			},
+			Record:   1,
+			Class:    1,
+			Ttl:      60,
+			RDLength: 4,
+			RData: []byte{
+				8, 8, 8, 8,
+			},
+		}
+
 		hb := head.Encode()
 		qb := question.Encode()
+		ab := answer.Encode()
 
 		by := []byte{}
 		by = append(by, hb...)
 		by = append(by, qb...)
+		by = append(by, ab...)
 
 		_, err = udpConn.WriteToUDP(by, source)
 		if err != nil {
