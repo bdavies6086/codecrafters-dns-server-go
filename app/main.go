@@ -34,16 +34,26 @@ func main() {
 		receivedData := string(buf[:size])
 		fmt.Printf("Received %d bytes from %s: %s\n", size, source, receivedData)
 
+		receivedHeader, err := message.DecodeHeader(buf)
+		if err != nil {
+			fmt.Println("Failed to decode header:", err)
+		}
+
+		responseCode := 0
+		if receivedHeader.OpCode != 0 {
+			responseCode = 4
+		}
+
 		head := message.Header{
-			ID:                    1234,
+			ID:                    receivedHeader.ID,
 			Query:                 true,
-			OpCode:                0,
+			OpCode:                receivedHeader.OpCode,
 			AuthorativeAnswer:     false,
 			Truncation:            false,
-			RecursionDesired:      false,
+			RecursionDesired:      receivedHeader.RecursionDesired,
 			RecursionAvailable:    false,
 			Reserved:              0,
-			ResponseCode:          0,
+			ResponseCode:          uint8(responseCode),
 			QuestionCount:         1,
 			AnswerRecordCount:     1,
 			AuthorityRecordCount:  0,
