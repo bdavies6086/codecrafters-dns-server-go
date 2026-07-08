@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/codecrafters-io/dns-server-starter-go/app/message"
 )
@@ -23,8 +24,8 @@ func main() {
 	defer udpConn.Close()
 
 	buf := make([]byte, 512)
-
 	for {
+
 		size, source, err := udpConn.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Println("Error receiving data:", err)
@@ -40,7 +41,7 @@ func main() {
 			break
 		}
 
-		remainingBytes := buf[13:]
+		remainingBytes := buf[12:]
 
 		// questions := []message.Question{}
 
@@ -48,11 +49,11 @@ func main() {
 
 		// for now handle a single question
 		q, bytesConsumed, err := message.DecodeQuestion(remainingBytes)
-		fmt.Println("bytes consumed decoding question %d", bytesConsumed)
 		if err != nil {
 			fmt.Printf("Failed to decode question")
 			break
 		}
+		fmt.Printf("bytes consumed decoding question %d\n", bytesConsumed)
 
 		// questions = append(questions, q)
 
@@ -99,6 +100,8 @@ func main() {
 		by = append(by, hb...)
 		by = append(by, qb...)
 		by = append(by, ab...)
+
+		fmt.Printf("writing for %s\n", strings.Join(answer.Labels, "."))
 
 		_, err = udpConn.WriteToUDP(by, source)
 		if err != nil {

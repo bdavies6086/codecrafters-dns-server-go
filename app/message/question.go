@@ -2,7 +2,6 @@ package message
 
 import (
 	"encoding/binary"
-	"fmt"
 )
 
 type Question struct {
@@ -23,7 +22,9 @@ func DecodeQuestion(q []byte) (Question, uint8, error) {
 			break
 		}
 
-		content := q[index+1 : index+len]
+		index = index + 1
+
+		content := q[index : index+len]
 		labels = append(labels, string(content))
 		index = index + len
 	}
@@ -31,10 +32,6 @@ func DecodeQuestion(q []byte) (Question, uint8, error) {
 	question.Labels = labels
 
 	index = index + 1
-	// make sure we have enough content to parse
-	if uint8(len(q)) != (index + uint8(4)) {
-		return Question{}, 0, fmt.Errorf("not enough bytes to decode question length: %d", len(q))
-	}
 
 	// get record
 	r1 := q[index]
