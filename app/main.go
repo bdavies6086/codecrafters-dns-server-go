@@ -36,8 +36,28 @@ func main() {
 
 		receivedHeader, err := message.DecodeHeader(buf)
 		if err != nil {
-			fmt.Println("Failed to decode header:", err)
+			fmt.Println("Failed to decode header")
+			break
 		}
+
+		remainingBytes := buf[13:]
+
+		// questions := []message.Question{}
+
+		// for i := uint16(0); i < receivedHeader.QuestionCount; i++ {
+
+		// for now handle a single question
+		q, bytesConsumed, err := message.DecodeQuestion(remainingBytes)
+		fmt.Println("bytes consumed decoding question %d", bytesConsumed)
+		if err != nil {
+			fmt.Printf("Failed to decode question")
+			break
+		}
+
+		// questions = append(questions, q)
+
+		// remainingBytes = remainingBytes[bytesConsumed:]
+		// }
 
 		responseCode := 0
 		if receivedHeader.OpCode != 0 {
@@ -60,20 +80,10 @@ func main() {
 			AdditionalRecordCount: 0,
 		}
 
-		question := message.Question{
-			Labels: []string{
-				"codecrafters", "io",
-			},
-			Record: 1,
-			Class:  1,
-		}
-
 		answer := message.Answer{
-			Labels: []string{
-				"codecrafters", "io",
-			},
-			Record:   1,
-			Class:    1,
+			Labels:   q.Labels,
+			Record:   q.Record,
+			Class:    q.Class,
 			Ttl:      60,
 			RDLength: 4,
 			RData: []byte{
@@ -82,7 +92,7 @@ func main() {
 		}
 
 		hb := head.Encode()
-		qb := question.Encode()
+		qb := q.Encode()
 		ab := answer.Encode()
 
 		by := []byte{}

@@ -1,52 +1,60 @@
 package message
 
+import (
+	"encoding/binary"
+	"fmt"
+)
+
 type Question struct {
 	Labels []string
 	Record uint16
 	Class  uint16
 }
 
-// func Decode(q []byte) (Question, error) {
-// 	bs := []byte{}
+func DecodeQuestion(q []byte) (Question, uint8, error) {
+	index := uint8(0)
+	question := Question{}
+	labels := []string{}
 
-// 	index := 0
-// 	question := Question{}
-// 	labels := []string{}
+	for {
+		// exit on null byte
+		len := uint8(q[index])
+		if len == 0 {
+			break
+		}
 
-// 	for {
-// 		// exit on null byte
-// 		len := q[index]
-// 		if len == 0 {
-// 			break
-// 		}
+		content := q[index+1 : index+len]
+		labels = append(labels, string(content))
+		index = index + len
+	}
 
-// 		content := q[index+1 : index+len]
-// 		labels = append(labels, string(content))
-// 		index = index + len
-// 	}
+	question.Labels = labels
 
-// 	question.Labels = labels
+	index = index + 1
+	// make sure we have enough content to parse
+	if uint8(len(q)) != (index + uint8(4)) {
+		return Question{}, 0, fmt.Errorf("not enough bytes to decode question length: %d", len(q))
+	}
 
-// 	// get record
-// 	index = index + 1
-// 	r1 := q[index]
+	// get record
+	r1 := q[index]
 
-// 	index = index + 1
-// 	r2 := q[index]
+	index = index + 1
+	r2 := q[index]
 
-// 	question.Record = uint16(r1, r2)
+	question.Record = binary.BigEndian.Uint16([]byte{r1, r2})
 
-// 	// get class
-// 	index = index + 1
-// 	c1 := q[index]
+	// get class
+	index = index + 1
+	c1 := q[index]
 
-// 	index = index + 1
-// 	c2 := q[index]
+	index = index + 1
+	c2 := q[index]
 
-// 	question.Class = uint16(c1, c2)
+	question.Class = binary.BigEndian.Uint16([]byte{c1, c2})
 
-// 	return question, nil
-// }
+	return question, index + 1, nil
+}
 
 func (q Question) Encode() []byte {
 	bs := []byte{}
