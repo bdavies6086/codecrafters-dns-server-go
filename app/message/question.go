@@ -10,8 +10,8 @@ type Question struct {
 	Class  uint16
 }
 
-func DecodeQuestion(q []byte) (Question, uint8, error) {
-	index := uint8(0)
+func DecodeQuestion(q []byte, startIndex uint8) (Question, uint8, error) {
+	index := uint8(startIndex)
 	question := Question{}
 	labels := []string{}
 
@@ -20,6 +20,13 @@ func DecodeQuestion(q []byte) (Question, uint8, error) {
 		len := uint8(q[index])
 		if len == 0 {
 			break
+		}
+
+		// if 2 msb are enabled then content is compressed
+		compressed := (len & 192) > 0
+		if compressed {
+			index = len & 63
+			len = q[index]
 		}
 
 		index = index + 1

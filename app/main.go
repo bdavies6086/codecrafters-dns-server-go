@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/codecrafters-io/dns-server-starter-go/app/message"
 )
@@ -41,24 +40,22 @@ func main() {
 			break
 		}
 
-		remainingBytes := buf[12:]
+		questions := []message.Question{}
+		questionOffset := uint8(12)
 
-		// questions := []message.Question{}
+		for i := uint16(0); i < receivedHeader.QuestionCount; i++ {
 
-		// for i := uint16(0); i < receivedHeader.QuestionCount; i++ {
+			// for now handle a single question
+			// we need to send the whole buffer in because compression means we offset from the header
+			q, offset, err := message.DecodeQuestion(buf, questionOffset)
+			if err != nil {
+				fmt.Printf("Failed to decode question")
+				break
+			}
 
-		// for now handle a single question
-		q, bytesConsumed, err := message.DecodeQuestion(remainingBytes)
-		if err != nil {
-			fmt.Printf("Failed to decode question")
-			break
+			questionOffset = offset
+			questions = append(questions, q)
 		}
-		fmt.Printf("bytes consumed decoding question %d\n", bytesConsumed)
-
-		// questions = append(questions, q)
-
-		// remainingBytes = remainingBytes[bytesConsumed:]
-		// }
 
 		responseCode := 0
 		if receivedHeader.OpCode != 0 {
@@ -75,33 +72,38 @@ func main() {
 			RecursionAvailable:    false,
 			Reserved:              0,
 			ResponseCode:          uint8(responseCode),
-			QuestionCount:         1,
-			AnswerRecordCount:     1,
+			QuestionCount:         uint16(len(questions)),
+			AnswerRecordCount:     uint16(len(questions)),
 			AuthorityRecordCount:  0,
 			AdditionalRecordCount: 0,
 		}
 
-		answer := message.Answer{
-			Labels:   q.Labels,
-			Record:   q.Record,
-			Class:    q.Class,
-			Ttl:      60,
-			RDLength: 4,
-			RData: []byte{
-				8, 8, 8, 8,
-			},
+		by := []byte{}
+		hb := head.Encode()
+		by = append(by, hb...)
+
+		for _, q := range questions {
+			qb := q.Encode()
+			by = append(by, qb...)
 		}
 
-		hb := head.Encode()
-		qb := q.Encode()
-		ab := answer.Encode()
+		for _, q := range questions {
+			answer := message.Answer{
+				Labels:   q.Labels,
+				Record:   q.Record,
+				Class:    q.Class,
+				Ttl:      60,
+				RDLength: 4,
+				RData: []byte{
+					8, 8, 8, 8,
+				},
+			}
 
-		by := []byte{}
-		by = append(by, hb...)
-		by = append(by, qb...)
-		by = append(by, ab...)
+			ab := answer.Encode()
+			by = append(by, ab...)
 
-		fmt.Printf("writing for %s\n", strings.Join(answer.Labels, "."))
+		}
+		// fmt.Printf("writing for %s\n", strings.Join(answer.Labels, "."))
 
 		_, err = udpConn.WriteToUDP(by, source)
 		if err != nil {
