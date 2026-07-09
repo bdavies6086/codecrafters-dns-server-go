@@ -41,19 +41,18 @@ func main() {
 		}
 
 		questions := []message.Question{}
-		questionOffset := uint8(12)
+		questionOffset := uint16(12)
 
 		for i := uint16(0); i < receivedHeader.QuestionCount; i++ {
 
 			// for now handle a single question
 			// we need to send the whole buffer in because compression means we offset from the header
-			q, offset, err := message.DecodeQuestion(buf, questionOffset)
+			q, qo, err := message.DecodeQuestion(buf, questionOffset)
 			if err != nil {
 				fmt.Printf("Failed to decode question")
 				break
 			}
-
-			questionOffset = offset
+			questionOffset = qo
 			questions = append(questions, q)
 		}
 
@@ -103,7 +102,6 @@ func main() {
 			by = append(by, ab...)
 
 		}
-		// fmt.Printf("writing for %s\n", strings.Join(answer.Labels, "."))
 
 		_, err = udpConn.WriteToUDP(by, source)
 		if err != nil {

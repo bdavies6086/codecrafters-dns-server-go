@@ -10,30 +10,43 @@ type Question struct {
 	Class  uint16
 }
 
-func DecodeQuestion(q []byte, startIndex uint8) (Question, uint8, error) {
-	index := uint8(startIndex)
+func DecodeQuestion(q []byte, startIndex uint16) (Question, uint16, error) {
+	index := startIndex
 	question := Question{}
 	labels := []string{}
 
+	var compressedIndex uint16
+
 	for {
 		// exit on null byte
-		len := uint8(q[index])
-		if len == 0 {
+		initialByte := q[index]
+		if initialByte == 0 {
+			if compressedIndex > 0 {
+				index = compressedIndex
+				compressedIndex = 0
+				continue
+			}
 			break
 		}
 
 		// if 2 msb are enabled then content is compressed
-		compressed := (len & 192) > 0
+		compressed := (initialByte & 192) == 192
 		if compressed {
-			index = len & 63
-			len = q[index]
+			compressedIndex = index + 2
+			offset := binary.BigEndian.Uint16([]byte{initialByte & 63, q[index+1]})
+			index = offset
+			continue
 		}
+
+		len := initialByte
 
 		index = index + 1
 
-		content := q[index : index+len]
+		content := q[index : index+uint16(len)]
 		labels = append(labels, string(content))
-		index = index + len
+
+		index = index + uint16(len)
+
 	}
 
 	question.Labels = labels
